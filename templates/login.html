@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>评委登录</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        .login-container h2 {
+            text-align: center;
+        }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .login-form input,
+        .login-form select,
+        .login-form button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .login-form button {
+            background-color: #007BFF;
+            color: #fff;
+            cursor: pointer;
+        }
+        .login-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>评委登录</h2>
+        <form class="login-form" id="loginForm">
+            <input type="text" id="account" placeholder="账号" required>
+            <select id="role" required>
+                <option value="admin">管理员</option>
+                <option value="judge">评委</option>
+            </select>
+            <button type="submit">登录</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const account = document.getElementById('account').value;
+            const role = document.getElementById('role').value;
+            // 发送登录请求
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    account: account,
+                    role: role
+                })
+            })
+           .then(response => response.json())
+           .then(data => {
+                if (data.success) {
+                    // 设置cookie，保留12小时
+                    const expiration = new Date(Date.now() + 12 * 60 * 60 * 1000);
+                    document.cookie = `id=${data.id}; expires=${expiration.toUTCString()}; path=/`;
+                    document.cookie = `organization=${data.organization}; expires=${expiration.toUTCString()}; path=/`;
+                    window.location.href = 'app.html';
+                } else {
+                    alert('登录失败，请检查账号和身份！');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
