@@ -62,7 +62,7 @@
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const account = document.getElementById('account').value;
-            const role = document.getElementById('role').value;
+            const role = document.getElementById('role').selectedOptions[0].text;
             // 发送登录请求
             fetch('/login', {
                 method: 'POST',
@@ -79,9 +79,9 @@
                 if (data.success) {
                     // 设置cookie，保留12小时
                     const expiration = new Date(Date.now() + 12 * 60 * 60 * 1000);
-                    document.cookie = `id=${data.id}; expires=${expiration.toUTCString()}; path=/`;
-                    document.cookie = `organization=${data.organization}; expires=${expiration.toUTCString()}; path=/`;
-                    window.location.href = 'app.html';
+                    document.cookie = `judge_id=${data.id}; expires=${expiration.toUTCString()}; path=/`;
+                    document.cookie = `role=${data.role}; expires=${expiration.toUTCString()}; path=/`;
+                    window.location.href = '/';
                 } else {
                     alert('登录失败，请检查账号和身份！');
                 }
