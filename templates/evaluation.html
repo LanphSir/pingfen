@@ -238,6 +238,7 @@
                     <button id="prev-video" onclick="prevVideo()">上一个视频</button>
                     <button id="next-video" onclick="nextVideo()">下一个视频</button>
                 </div>
+                <div id="video-description" class="indent-2"></div>
             </div>
             
             <!-- 评分区域 -->
@@ -565,6 +566,9 @@
             current_entryId=videoFiles[currentVideoIndex].entry_id;
             document.getElementById('project-name').textContent = videoFiles[currentVideoIndex].project_name+" - "+videoFiles[currentVideoIndex].project_type;
             document.getElementById('video-title').textContent = videoFiles[currentVideoIndex].title;
+            if (videoFiles[currentVideoIndex].description != null)  {
+                document.getElementById('video-description').textContent = videoFiles[currentVideoIndex].description;
+            }
             videoPlayer.load();
 
             // 清空分数

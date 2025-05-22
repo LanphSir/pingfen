@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作品上传</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <style>
+        .page-content {
+            animation: fadeIn 0.3s ease-in-out;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .form-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #334155;
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #334155;
+            transition: all 0.2s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px #e0f2fe;
+        }
+        .error-message {
+            display: none;
+            margin-top: 0.25rem;
+            font-size: 0.75rem;
+            color: #dc2626;
+        }
+        .error .error-message { display: block; }
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+            border: 2px dashed #e2e8f0;
+            border-radius: 0.5rem;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .file-upload:hover {
+            border-color: #2563eb;
+            background: #e0f2fe;
+        }
+        .file-icon {
+            font-size: 2.5rem;
+            color: #475569;
+        }
+        .file-text {
+            font-size: 0.875rem;
+            color: #475569;
+        }
+        .file-preview {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #334155;
+        }
+        .action-btn {
+            padding: 0.75rem 2rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .submit-btn {
+            background: #2563eb;
+            color: white;
+            margin-right: 1rem;
+        }
+        .submit-btn:hover {
+            background: #1d4ed8;
+        }
+        .cancel-btn {
+            background: #f8fafc;
+            color: #334155;
+        }
+        .cancel-btn:hover {
+            background: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="w-full h-full bg-white">
+        <!-- 顶部导航 -->
+        <div class="flex items-center justify-between bg-gray-50 border-b border-gray-200 py-2 px-4">
+            <!-- 左侧返回 -->
+            <div class="flex items-center gap-2">
+                <a href="#" class="text-gray-600 hover:text-gray-800 transition-colors">
+                    <i class="fas fa-chevron-left text-lg"></i>
+                </a>
+                <h3 class="text-sm font-medium text-gray-800">作品上传</h3>
+            </div>
+
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="page-content p-6">
+            <div class="form-card">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">作品上传表单</h3>
+                <form id="uploadForm" class="space-y-4" method="POST">
+                    <!-- 所属单位选择-->
+                    <div class="mb-4" id="organization">
+                        <label
+                            for="school"
+                            class="block text-gray-700 text-sm font-bold mb-2"
+                            >所属学校</label
+                        >
+                        <select
+                            id="school"
+                            name="school"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            onchange="updateDepartments()"
+                        >
+                            <option value="">请选择单位</option>
+                            <option value="单位1">单位1</option>
+                            <option value="单位2">单位2</option>
+                            <option value="单位3">单位3</option>
+                        </select>
+                        <div class="error-message">学校名称不能为空</div>
+                    </div>
+                    <div class="mb-4" id="department">
+                        <label
+                            for="department"
+                            class="block text-gray-700 text-sm font-bold mb-2"
+                            >所属部门（院系）</label
+                        >
+                        <select
+                            id="department"
+                            name="department"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            disabled
+                        >
+                            <option value="">请先选择单位</option>
+                        </select>
+                        <div class="error-message">院系名称不能为空</div>
+                    </div>
+
+                    <!-- 所属院系 -->
+
+                    <div class="input-group">
+                        <label class="input-label" for="account">学号</label>
+                        <input type="text" id="account" name="account" class="input-field" placeholder="请输入学号" required>
+                        <div class="error-message">学号不能为空</div>
+                    </div>
+
+                    <!-- 姓名 -->
+                    <div class="input-group">
+                        <label class="input-label" for="name">姓名</label>
+                        <input type="text" id="name" name="name" class="input-field" placeholder="请输入姓名" required>
+                        <div class="error-message">姓名不能为空</div>
+
+                    <!-- 联系方式 -->
+                    <div class="input-group">
+                        <label class="input-label">联系方式</label>
+                        <div class="flex gap-4 md:flex-row flex-col">
+                            <div class="flex-1">
+                                <input type="tel" id="contact" name="contact" class="input-field" placeholder="手机号/邮箱" required>
+                                <div class="error-message">请输入有效的11位手机号/有效邮箱</div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">手机或邮箱填写一项</p>
+                    </div>
+
+                    <!-- 参加项目 -->
+                    <div class="input-group">
+                        <label class="input-label" for="project">参加项目</label>
+                        <select id="project" name="project" class="input-field" required>
+                            <option value="" disabled selected>请选择参加项目</option>
+                            <option value="tech">科技创新项目</option>
+                            <option value="design">艺术设计项目</option>
+                            <option value="culture">文化传承项目</option>
+                            <option value="other">其他</option>
+                        </select>
+                        <div class="error-message">请选择参加项目</div>
+                    </div>
+
+                    <!-- 作品名 -->
+                    <div class="input-group">
+                        <label class="input-label" for="workName">作品名</label>
+                        <input type="text" id="workName" name="workName" class="input-field" placeholder="请输入作品名称" required>
+                        <div class="error-message">作品名称不能为空</div>
+                    </div>
+
+                    <!-- 作品描述 -->
+                    <div class="input-group">
+                        <label class="input-label" for="description">作品描述</label>
+                        <textarea id="description" name="description" class="input-field" rows="4" placeholder="请简要描述作品内容" required></textarea>
+                        <div class="error-message">作品描述不能为空</div>
+                    </div>
+
+                    <!-- 作品上传（视频） -->
+                    <div class="input-group">
+                        <label class="input-label">作品视频</label>
+                        <label class="file-upload">
+                            <i class="fas fa-video file-icon"></i>
+                            <p class="file-text">点击上传视频文件</p>
+                            <p class="file-text text-xs">支持MP4格式，最大500MB</p>
+                            <input type="file" id="videoUpload" name="videoUpload" class="hidden" accept="video/mp4" required>
+                        </label>
+                        <div id="filePreview" class="file-preview"></div>
+                        <div class="error-message">请上传MP4格式视频文件</div>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="mt-4 flex gap-2">
+                        <button type="submit" class="action-btn submit-btn">立即上传</button>
+                        <button type="button" class="action-btn cancel-btn">重置表单</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 视频上传预览
+        const videoUpload = document.getElementById('videoUpload');
+        const filePreview = document.getElementById('filePreview');
+        
+        videoUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                filePreview.textContent = `已选择文件：${file.name}（${(file.size / 1024 / 1024).toFixed(2)}MB）`;
+                // 可扩展：添加视频预览功能（需video标签）
+            } else {
+                filePreview.textContent = '';
+            }
+        });
+
+        // 表单验证
+        // const form = document.getElementById('uploadForm');
+        const fields = {
+            school: document.getElementById('school'),
+            department: document.getElementById('department'),
+            phone: document.getElementById('contact'),
+            project: document.getElementById('project'),
+            workName: document.getElementById('workName'),
+            description: document.getElementById('description'),
+            videoUpload: document.getElementById('videoUpload')
+        };
+
+        // 定义各单位对应的下级单位（院系）
+        var departmentMap = {
+        };
+
+        function updateDepartments() {
+            const unitSelect = document.getElementById("school");
+            const departmentSelect = document.querySelector("#department select");
+            const selectedUnit = unitSelect.value;
+
+            // 清空原有的选项
+            departmentSelect.innerHTML = "";
+
+            if (selectedUnit) {
+                // 启用下拉框
+                departmentSelect.disabled = false;
+                // 添加提示选项
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "请选择院系";
+                departmentSelect.appendChild(defaultOption);
+
+                // 添加对应单位的院系选项
+                const departments = departmentMap[selectedUnit];
+                departments.forEach((department) => {
+                    const option = document.createElement("option");
+                    option.value = department.id;
+                    option.textContent = department.department;
+                    departmentSelect.appendChild(option);
+                });
+            } else {
+                // 禁用下拉框并添加提示选项
+                departmentSelect.disabled = true;
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "请先选择单位";
+                departmentSelect.appendChild(defaultOption);
+            }
+        }
+
+
+        // 输入时移除错误提示
+        Object.values(fields).forEach(field => {
+            field.addEventListener('input', () => {
+                field.parentElement.classList.remove('error');
+            });
+        });
+
+
+        async function initForm() {
+            try {
+                const response = await fetch('/get_upload_form/1');
+                const data = await response.json();
+                console.log(data);
+                
+                const projects = data.projects;
+                const form = document.getElementById('uploadForm');
+                const projectSelect = form.querySelector('#project');
+                projectSelect.innerHTML = '';
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '请选择项目';
+                projectSelect.appendChild(defaultOption);
+                projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.name;
+                    projectSelect.appendChild(option);
+                });
+
+                const departments = data.organizations;
+                const groupedDepartments = {};
+                departments.forEach(department => {
+                    if (!groupedDepartments[department.name]) {
+                        groupedDepartments[department.name] = [];
+                    }
+                    groupedDepartments[department.name].push({department:department.department, id: department.id});
+                });
+                departmentMap = groupedDepartments;
+                console.log(departmentMap);
+                const schoolSelect = form.querySelector('#school');
+                schoolSelect.innerHTML = '';
+                const defaultSchoolOption = document.createElement('option');
+                defaultSchoolOption.value = '';
+                defaultSchoolOption.textContent = '请选择学校';
+                schoolSelect.appendChild(defaultSchoolOption);
+                const schools = Object.keys(groupedDepartments);
+                schools.forEach(school => {
+                    const option = document.createElement('option');
+                    option.value = school;
+                    option.textContent = school;
+                    schoolSelect.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error("表单初始化失败:", error);
+                
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initForm);
+
+        async function submitForm(e) {
+            // 阻止表单默认提交行为
+            e.preventDefault();
+
+            // 简单的表单验证
+            const form = document.getElementById('uploadForm');
+            
+            const fields = form.querySelectorAll('input, select, textarea');
+            let isValid = true;
+            fields.forEach(field => {
+                if (field.value.trim() === '') {
+                    field.parentElement.classList.add('error');
+                    isValid = false;
+                } else {
+                    field.parentElement.classList.remove('error');
+                }
+            });
+
+            if (isValid) {
+                try {
+                    // 获取表单数据
+                    const formData = new FormData(form);
+
+                    // 发送表单数据
+                    const response = await fetch('/upload_entry', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    // 检查响应状态
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    // 解析响应数据
+                    const data = await response.json();
+                    console.log(data);
+
+                    // 可在此处添加上传成功后的处理逻辑，如提示用户、重置表单等
+                    alert(data);
+                    // form.reset();
+                    // document.getElementById('filePreview').textContent = '';
+                } catch (error) {
+                    console.error('表单提交失败:', error);
+                    // 可在此处添加上传失败后的处理逻辑，如提示用户
+                    alert('上传失败，请稍后重试。');
+                }
+            }
+        }
+        document.querySelector('.submit-btn').addEventListener('click', submitForm);
+
+    </script>
+</body>
+</html>
+    

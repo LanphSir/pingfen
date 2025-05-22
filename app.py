@@ -33,6 +33,27 @@ def user_info():
 def update_page(entry_id):
     return send_from_directory('templates', 'update_evaluation.html')
 
+@app.route('/upload')
+def upload_page():
+    return send_from_directory('templates', 'upload.html')
+
+
+#获取上传作品表单接口
+@app.route('/get_upload_form/<int:competition_id>', methods=['GET'])
+def get_upload_form(competition_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''SELECT id, name,department,remark FROM organization where remark !='admin' or remark is null''')
+    organizations = cursor.fetchall()
+    
+    cursor.execute('SELECT id, name FROM project where competition_id = ?', (competition_id,))
+    projects = cursor.fetchall()
+    conn.close()
+    result = [{'id': org[0], 'name': org[1],'department':org[2],'remark':org[3]} for org in organizations]
+    result2 = [{'id': proj[0], 'name': proj[1]} for proj in projects]
+    return jsonify({'organizations': result, 'projects': result2})
+    
+
 #获取项目接口
 @app.route('/get_evaluation_dimensions', methods=['POST'])
 def get_evaluation_dimensions():
@@ -201,7 +222,7 @@ def get_unreviewed_entries():
     cursor.execute('''
         SELECT ja.judge_id,ja.project_id,ja.assign_time,
                 e.id, e.title, e.url, e.type, 
-                p.name, p.type
+                p.name, p.type,e.description
             FROM judge_assignment ja
             JOIN entry e ON ja.project_id = e.project_id
             JOIN project p ON ja.project_id = p.id
@@ -220,9 +241,10 @@ def get_unreviewed_entries():
     conn.close()
     
     
-    result = [{'entry_id': entry[3],'judge_id': entry[0], 'project_id': entry[1], 'title': entry[4], 'url': entry[5], 'type': entry[6], 'project_name': entry[7], 'project_type': entry[8]} for entry in unentries]
+    result = [{'entry_id': entry[3],'judge_id': entry[0], 'project_id': entry[1], 'title': entry[4], 'url': entry[5], 'type': entry[6], 'project_name': entry[7], 'project_type': entry[8], 'description': entry[9]} for entry in unentries]
     return jsonify(result)
 
+#查询评分记录
 @app.route('/get_evaluation_record', methods=['POST'])
 def get_evaluation_record():
     data = request.get_json()
@@ -232,7 +254,7 @@ def get_evaluation_record():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
-        SELECT e.id, e.title, e.url, er.score, p.name, p.type,p.id
+        SELECT e.id, e.title, e.url, er.score, p.name, p.type,p.id,e.description
         FROM entry e
         JOIN evaluation_record er ON e.id = er.entry_id
         join project p on e.project_id = p.id
@@ -250,7 +272,7 @@ def get_evaluation_record():
     dimensions = cursor.fetchall() 
     conn.close()
 
-    return jsonify({'evaluation':{'entry_id': records[0], 'title': records[1], 'url': records[2], 'score': records[3], 'project_name': records[4], 'project_type': records[5], 'project_id': records[6]}, 'dimensions': [{'id': dim[0], 'name': dim[1], 'weight': dim[2], 'description': dim[3], 'score': dim[4]} for dim in dimensions]})
+    return jsonify({'evaluation':{'entry_id': records[0], 'title': records[1], 'url': records[2], 'score': records[3], 'project_name': records[4], 'project_type': records[5], 'project_id': records[6], 'description': records[7]}, 'dimensions': [{'id': dim[0], 'name': dim[1], 'weight': dim[2], 'description': dim[3], 'score': dim[4]} for dim in dimensions]})
 
 @app.route('/update_evaluation', methods=['POST'])
 def update_evaluation():
@@ -270,6 +292,73 @@ def update_evaluation():
     conn.commit()
     conn.close()
     return jsonify({'message': '评分更新成功'})
+
+#上传作品接口
+@app.route('/upload_entry', methods=['POST'])
+def upload_entry():
+    data = {
+        'school': request.form.get('school'),
+        'department': request.form.get('department'),
+        'account': request.form.get('account'),
+        'name': request.form.get('name'),
+        'contact': request.form.get('contact'),
+        'project': request.form.get('project'),
+        'workName': request.form.get('workName'),
+        'description': request.form.get('description'),
+        'video': request.files.get('videoUpload')
+    }    
+    
+    if data['video']:
+        import os
+        video_path = f'uploads/{data["video"].filename}'
+        os.makedirs(os.path.dirname(video_path), exist_ok=True)
+        data['video'].save(video_path)
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # 检查是否已经存在相同的作品
+        cursor.execute('''
+            SELECT COUNT(*) FROM entry e join entry_participant ep on e.id = ep.entry_id join participant p on ep.participant_id = p.id
+            where e.project_id =? and p.organization_id =? and p.account =? 
+        ''', (data['project'], data['department'], data['name']))
+        count = cursor.fetchone()[0]
+        if count>0 :
+            conn.close()
+            return jsonify({'message': '您已提交过相同项目的作品'})       
+        
+        video_path = f'uploads/{data["video"].filename}'
+        data['video'].save(video_path)
+        # 插入作品
+        cursor.execute('''
+            INSERT INTO entry (title, url, type, submit_time,project_id)
+            VALUES (?,?,?,?,?)
+        ''', (data['workName'], video_path, 'video', datetime.now().strftime('%Y-%m-%d %H:%M:%S'),data['project']))
+        entry_id = cursor.lastrowid
+        
+        #查询是否有相同的人员或参赛组织
+        cursor.execute('''
+            SELECT id FROM participant
+            where organization_id =? and account =?
+        ''', (data['department'], data['account']))
+        participant = cursor.fetchone()
+        print(participant)
+        participant_id = participant[0] if participant else None
+        if participant_id is None:        
+            cursor.execute('''
+                INSERT INTO participant (name, organization_id, account, contact)
+                VALUES (?,?,?,?)
+            ''', (data['name'], data['department'], data['account'], data['contact']))
+            participant_id = cursor.lastrowid
+        cursor.execute('''
+            INSERT INTO entry_participant (entry_id, participant_id)
+            VALUES (?,?)
+        ''', (entry_id, participant_id))
+        
+        conn.commit()
+        conn.close()
+    
+    return jsonify({'message': '作品上传成功'+data['workName']})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
