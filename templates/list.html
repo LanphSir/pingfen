@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表格页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <style>
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+            height: calc(100vh - 140px); /* 调整高度适配分页 */
+            overflow-y: auto;
+        }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-btn.active {
+            background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 100%);
+            color: #1e40af;
+            border-bottom: 2px solid #2563eb;
+            font-weight: 600;
+            transform: translateY(-1px);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            min-width: 160px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            animation: slideDown 0.2s ease-out;
+        }
+        .dropdown-menu.active { display: block; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.5rem;
+        }
+        .data-table thead th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .data-table tbody tr {
+            background: white;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+        }
+        .data-table tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        .data-table td {
+            padding: 1.25rem 1.5rem;
+            font-size: 0.875rem;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .action-btn {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .action-btn.view {
+            background: #e0f2fe;
+            color: #1e40af;
+        }
+        .action-btn.view:hover {
+            background: #bae6fd;
+        }
+        .action-btn.edit {
+            background: #fef3c7;
+            color: #a16207;
+        }
+        .action-btn.edit:hover {
+            background: #fde68a;
+        }
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+        }
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #475569;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+        }
+        .page-btn:hover {
+            background: #e2e8f0;
+        }
+        .page-btn.active {
+            background: #e0f2fe;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .page-active {
+            font-weight: 600;
+            background: #e0f2fe;
+            color: #1e40af;
+        }
+        
+        .go-back-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #475569;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+        }
+        .go-back-btn:hover {
+            background: #e2e8f0;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="w-full h-full bg-white">
+        <!-- 顶部导航（复用） -->
+        <div class="flex flex-nowrap items-center justify-between bg-gray-50 border-b border-gray-200 py-2 px-4">
+            <div class="flex overflow-x-auto">
+                <button class="go-back-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-t-lg mr-2"><i class="fas fa-home mr-2"></i>首页</button>
+                <button class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-t-lg mr-2 active" 
+                        data-tab="user-table">
+                已点评作品列表
+                </button>
+            </div>
+            <div class="relative">
+                <button id="userMenuTrigger" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <!-- <img src="https://picsum.photos/32/32" alt="用户头像" class="w-8 h-8 rounded-full object-cover"> -->
+                    <span class="hidden md:block" id="judge-name"></span>
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+                <div class="dropdown-menu" id="userDropdown">
+                    <div class="p-2 space-y-1">
+                        <a href="#" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-user mr-1"></i> 个人信息
+                        </a>
+                        <a href="#" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded hover:bg-gray-50 transition-colors" onclick="logout()">
+                            <i class="fas fa-sign-out-alt mr-1"></i> 退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="p-6">
+            <!-- 用户列表（默认激活） -->
+            <div id="user-table" class="tab-content active">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">用户数据表格</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table" id="userData">
+                        <thead>
+                            <tr>
+                                <th>作品ID</th>
+                                <th>所属项目</th>
+                                <th>作品名</th>
+                                <th>评分</th>
+                                <th>评分时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 模拟15条数据 -->
+                            <tr><td>#001</td><td><img src="https://picsum.photos/32/32?random=1" class="w-8 h-8 rounded-full"></td><td>李小雨</td><td>2025-03-15 14:23</td><td>2025-05-19 09:12</td><td><button class="action-btn view mr-2">查看详情</button><button class="action-btn edit">编辑信息</button></td></tr>
+                            <tr><td>#002</td><td><img src="https://picsum.photos/32/32?random=2" class="w-8 h-8 rounded-full"></td><td>王浩然</td><td>2025-04-02 16:45</td><td>2025-05-18 17:34</td><td><button class="action-btn view mr-2">查看详情</button><button class="action-btn edit">编辑信息</button></td></tr>
+                            <tr><td>#003</td><td><img src="https://picsum.photos/32/32?random=3" class="w-8 h-8 rounded-full"></td><td>陈佳明</td><td>2025-05-01 10:08</td><td>2025-05-19 11:56</td><td><button class="action-btn view mr-2">查看详情</button><button class="action-btn edit">编辑信息</button></td></tr>
+                            <tr><td>#004</td><td><img src="https://picsum.photos/32/32?random=4" class="w-8 h-8 rounded-full"></td><td>周雪晴</td><td>2025-05-05 09:20</td><td>2025-05-19 14:05</td><td><button class="action-btn view mr-2">查看详情</button><button class="action-btn edit">编辑信息</button></td></tr>
+                            <tr><td>#005</td><td><img src="https://picsum.photos/32/32?random=5" class="w-8 h-8 rounded-full"></td><td>吴俊豪</td><td>2025-05-10 15:30</td><td>2025-05-19 16:22</td><td><button class="action-btn view mr-2">查看详情</button><button class="action-btn edit">编辑信息</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 用户列表分页 -->
+                <div class="pagination" id="userPagination">
+                    <button class="page-btn" id="prevUser">上一页</button>
+                    <div class="page-btn-box">
+                        <button class="page-btn page-active" data-page="1">1</button>
+                    </div>
+                    <button class="page-btn" id="nextUser">下一页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/checklogin.js"></script>
+    <script>
+
+        //返回
+        document.querySelector('.go-back-btn').addEventListener('click', function() {
+            window.location.href = '/'; 
+        })
+
+        var currentPage = 1;
+        var itemsPerPage = 15;
+        var totalCount = 0;
+        const cookies = document.cookie.split('; ');
+        const idCookie = cookies.find(c => c.startsWith('judge_id='));
+        const roleCookie = cookies.find(c => c.startsWith('role='));
+        const judgeCookie = cookies.find((c) => c.startsWith("name="));
+        var judge_id = idCookie ? idCookie.split('=')[1] : null,project_id=window.location.pathname.split('/')[2];
+        function checkLogin() {    
+            if (!idCookie || !roleCookie) {
+                window.location.href = 'login.html';
+            }
+            document.getElementById("judge-name").innerText = judgeCookie.split("=")[1];
+        }    
+        window.addEventListener('load', checkLogin);
+
+        async function paginate(tableId) {
+            const entrys=await fetch('/get_reviewed_entries', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    judge_id: judge_id,
+                    project_id: project_id,
+                    page_size: itemsPerPage,
+                    page_number: currentPage
+                })
+            })
+            const data = await entrys.json();
+            const tableBody = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // 清空表格内容
+            data.forEach(entry => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = entry.id;
+                row.insertCell(1).textContent = entry.project_name+'('+entry.project_type+')';
+                row.insertCell(2).textContent = entry.title;
+                row.insertCell(3).textContent = entry.score;
+                row.insertCell(4).textContent = entry.score_time;
+                row.insertCell(5).innerHTML = `<button class="action-btn view">重新评分</button>`;
+
+                // 查看详情和编辑信息按钮的逻辑
+                const viewBtn = row.cells[5].querySelector('.action-btn.view');
+                viewBtn.addEventListener('click', () => {
+                    // 跳转到详情页，传递entry.id作为参数
+                    window.location.href = `/update/${entry.id}`;
+                });
+            })
+
+            totalCount = data[0].total_count;
+            updatePagination('user');
+        }
+        paginate('userData');
+
+        // 分页逻辑
+        function updatePagination(tableId) {
+            const pagination = document.getElementById(`${tableId}Pagination`);
+            const prevButton = pagination.querySelector('#prevUser');
+            const nextButton = pagination.querySelector('#nextUser');
+            const pageBtnBox = pagination.querySelector('.page-btn-box');
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage * itemsPerPage >= totalCount;
+
+            pageBtnBox.innerHTML = ''; // 清空页码按钮
+            const totalPages = Math.ceil(totalCount / itemsPerPage);
+            if (totalPages <= 7) {
+                // 当总页数小于等于7时，显示所有页码
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.textContent = i;
+                    pageBtn.classList.add('page-btn');
+                    if (i === currentPage) {
+                        pageBtn.classList.add('page-active');
+                    }
+                    pageBtn.addEventListener('click', () => {
+                        currentPage = i;
+                        paginate('userData');
+                    });
+                    pageBtnBox.appendChild(pageBtn);
+                }
+            } else {
+                // 当总页数大于7时，显示省略号
+                if (currentPage <= 3) {
+                    // 当前页在前3页，显示前5页加省略号和最后一页
+                    for (let i = 1; i <= 5; i++) {
+                        const pageBtn = document.createElement('button');
+                        pageBtn.textContent = i;
+                        pageBtn.classList.add('page-btn');
+                        if (i === currentPage) {
+                            pageBtn.classList.add('page-active');
+                        }
+                        pageBtn.addEventListener('click', () => {
+                            currentPage = i;
+                            paginate('userData');
+                        });
+                        pageBtnBox.appendChild(pageBtn);
+                    }
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    pageBtnBox.appendChild(ellipsis);
+                    const lastPageBtn = document.createElement('button');
+                    lastPageBtn.textContent = totalPages;
+                    lastPageBtn.classList.add('page-btn');
+                    lastPageBtn.addEventListener('click', () => {
+                        currentPage = totalPages;
+                        paginate('userData');
+                    });
+                    pageBtnBox.appendChild(lastPageBtn);
+                } else if (currentPage >= totalPages - 2) {
+                    // 当前页在后3页，显示第一页、省略号和后5页
+                    const firstPageBtn = document.createElement('button');
+                    firstPageBtn.textContent = 1;
+                    firstPageBtn.classList.add('page-btn');
+                    firstPageBtn.addEventListener('click', () => {
+                        currentPage = 1;
+                        paginate('userData');
+                    });
+                    pageBtnBox.appendChild(firstPageBtn);
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    pageBtnBox.appendChild(ellipsis);
+                    for (let i = totalPages - 4; i <= totalPages; i++) {
+                        const pageBtn = document.createElement('button');
+                        pageBtn.textContent = i;
+                        pageBtn.classList.add('page-btn');
+                        if (i === currentPage) {
+                            pageBtn.classList.add('page-active');
+                        }
+                        pageBtn.addEventListener('click', () => {
+                            currentPage = i;
+                            paginate('userData');
+                        });
+                        pageBtnBox.appendChild(pageBtn);
+                    }
+                } else {
+                    // 当前页在中间，显示第一页、省略号、当前页前后各2页、省略号和最后一页
+                    const firstPageBtn = document.createElement('button');
+                    firstPageBtn.textContent = 1;
+                    firstPageBtn.classList.add('page-btn');
+                    firstPageBtn.addEventListener('click', () => {
+                        currentPage = 1;
+                        paginate('userData');
+                    });
+                    pageBtnBox.appendChild(firstPageBtn);
+                    const ellipsis1 = document.createElement('span');
+                    ellipsis1.textContent = '...';
+                    pageBtnBox.appendChild(ellipsis1);
+                    for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+                        const pageBtn = document.createElement('button');
+                        pageBtn.textContent = i;
+                        pageBtn.classList.add('page-btn');
+                        if (i === currentPage) {
+                            pageBtn.classList.add('page-active');
+                        }
+                        pageBtn.addEventListener('click', () => {
+                            currentPage = i;
+                            paginate('userData');
+                        });
+                        pageBtnBox.appendChild(pageBtn);
+                    }
+                    const ellipsis2 = document.createElement('span');
+                    ellipsis2.textContent = '...';
+                    pageBtnBox.appendChild(ellipsis2);
+                    const lastPageBtn = document.createElement('button');
+                    lastPageBtn.textContent = totalPages;
+                    lastPageBtn.classList.add('page-btn');
+                    lastPageBtn.addEventListener('click', () => {
+                        currentPage = totalPages;
+                        paginate('userData');
+                    });
+                    pageBtnBox.appendChild(lastPageBtn);
+                }
+            }
+
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    paginate('userData');
+                }
+            });
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    paginate('userData');
+                }
+            });
+        }         
+        
+    </script>
+</body>
+</html>
+    

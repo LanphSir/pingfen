@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>视频评分界面</title>
+    <title>重新评分界面</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>		<script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         rel="stylesheet"
@@ -189,7 +190,7 @@
                 class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-t-lg mr-2 active"
                 data-tab="tab2"
             >
-                点评
+                重新点评
             </button>
         </div>
 
@@ -428,50 +429,39 @@
     </div>
 </div>
 <script src="/static/js/checklogin.js"></script>
+
     <script>        
         const cookies = document.cookie.split('; ');
         const idCookie = cookies.find(c => c.startsWith('judge_id='));
         const roleCookie = cookies.find(c => c.startsWith('role='));
         const judgeCookie = cookies.find((c) => c.startsWith("name="));
-        var current_entryId,
-            current_projectId=window.location.pathname.split('/')[2];
-            current_judgeId=idCookie.split('=')[1];
+        var current_entryId=window.location.pathname.split('/')[2];
+            current_judgeId=idCookie.split('=')[1],
+            current_projectId=1;
         async function loadEvaluationDimensions() {
             try {
                 // 获取评分维度
-                const dimResponse = await fetch('/get_evaluation_dimensions', {
+                const response= await fetch('/get_evaluation_record', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        project_id: current_projectId, 
+                        entry_id: current_entryId,
+                        judge_id: current_judgeId, 
                     })
                 });
-                const dimensions = await dimResponse.json();
+                const data = await response.json();
+                console.log(data);
+                current_projectId=data.evaluation.project_id;
                 
-                // 获取视频列表
-                const entryResponse = await fetch('/get_unreviewed_entries', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        project_id: current_projectId, 
-                        judge_id: current_judgeId,
-                    })
-                });
-
-                const entries = await entryResponse.json();
-                
-                videoFiles = entries;
+                videoFiles.push(data.evaluation);
                 initVideo();
-                
                 
                 // 动态生成评分维度
                 const ratingContainer = document.querySelector('.rating-box');                
                 ratingContainer.innerHTML ='';
-                dimensions.forEach((dimension, row_index) => {
+                data.dimensions.forEach((dimension, row_index) => {
                     const descriptions=dimension.description.trim().split(/\n/g);
                     
                     const ratingRow = document.createElement('div');

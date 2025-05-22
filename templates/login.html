@@ -52,8 +52,8 @@
         <form class="login-form" id="loginForm">
             <input type="text" id="account" placeholder="账号" required>
             <select id="role" required>
-                <option value="admin">管理员</option>
                 <option value="judge">评委</option>
+                <option value="admin">管理员</option>
             </select>
             <button type="submit">登录</button>
         </form>
@@ -80,6 +80,7 @@
                     // 设置cookie，保留12小时
                     const expiration = new Date(Date.now() + 12 * 60 * 60 * 1000);
                     document.cookie = `judge_id=${data.id}; expires=${expiration.toUTCString()}; path=/`;
+                    document.cookie = `name=${data.name}; expires=${expiration.toUTCString()}; path=/`;
                     document.cookie = `role=${data.role}; expires=${expiration.toUTCString()}; path=/`;
                     window.location.href = '/';
                 } else {

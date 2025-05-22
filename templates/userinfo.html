@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>标签切换页面</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+			rel="stylesheet"
+		/>
+		<style>
+			.tab-content {
+				display: none;
+				animation: fadeIn 0.3s ease-in-out;
+				height: calc(100vh - 64px);
+				overflow-y: auto;
+			}
+			.tab-content.active {
+				display: block;
+			}
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+					transform: translateY(10px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+			.tab-btn.active {
+				background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 100%);
+				color: #1e40af;
+				border-bottom: 2px solid #2563eb;
+				font-weight: 600;
+				transform: translateY(-1px);
+			}
+			.dropdown-menu {
+				display: none;
+				position: absolute;
+				top: 100%;
+				right: 0;
+				min-width: 160px;
+				background: white;
+				border-radius: 0.5rem;
+				box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+					0 2px 4px -1px rgba(0, 0, 0, 0.06);
+				animation: slideDown 0.2s ease-out;
+			}
+			.dropdown-menu.active {
+				display: block;
+			}
+			@keyframes slideDown {
+				from {
+					opacity: 0;
+					transform: translateY(-10px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+			.message-card {
+				background: white;
+				border-radius: 0.75rem;
+				box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+					0 1px 2px 0 rgba(0, 0, 0, 0.06);
+				transition: all 0.2s ease;
+			}
+			.message-card:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 4px 6 -1px rgba(0, 0, 0, 0.1),
+					0 2px 4 -1px rgba(0, 0, 0, 0.06);
+			}
+		</style>
+	</head>
+	<body class="bg-gray-50 h-screen overflow-hidden">
+		<div class="w-full h-full bg-white">
+			<!-- 顶部导航 -->
+			<div
+				class="flex flex-nowrap items-center justify-between bg-gray-50 border-b border-gray-200 py-2 px-4"
+			>
+				<!-- 左侧标签按钮 -->
+				<div class="flex overflow-x-auto">
+					<button
+						class="px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-t-lg mr-2"
+						data-tab="tab1"
+						onclick="window.location.href='/'"
+					>
+						<i class="fas fa-home mr-2"></i> 首页
+					</button>
+					<button
+						class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-t-lg mr-2 active"
+						data-tab="tab2"
+					>
+						<i class="fas fa-info-circle mr-2"></i> 个人信息
+					</button>
+				</div>
+
+				<!-- 右侧登录下拉 -->
+				<div class="relative">
+					<button
+						id="userMenuTrigger"
+						class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+					>
+						<span class="hidden md:block" id="judge-name"></span>
+						<i class="fas fa-chevron-down text-sm"></i>
+					</button>
+					<div class="dropdown-menu" id="userDropdown">
+						<div class="p-2 space-y-1">
+							<a
+								href="#"
+								class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded hover:bg-gray-50 transition-colors"
+								onclick="checkUserInfo()"
+							>
+								<i class="fas fa-user mr-1"></i> 个人信息
+							</a>
+							<a
+								href="#"
+								class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded hover:bg-gray-50 transition-colors"
+								onclick="logout()"
+							>
+								<i class="fas fa-sign-out-alt mr-1"></i> 退出登录
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- 内容区域 -->
+			<div class="page-content p-6">
+				<div class="max-w-2xl mx-auto">
+					<div class="bg-white p-6 rounded-lg shadow-md">
+						<h2 class="text-xl font-semibold mb-4">个人信息</h2>
+						<form>
+							<!-- 姓名输入框 -->
+							<div class="mb-4">
+								<label
+									for="name"
+									class="block text-gray-700 text-sm font-bold mb-2"
+									>姓名</label
+								>
+								<input
+									type="text"
+									id="name"
+									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+									placeholder="请输入姓名"
+								/>
+							</div>
+							<!-- 所属单位选择-->
+							<div class="mb-4" id="organization">
+								<label
+									for="unit"
+									class="block text-gray-700 text-sm font-bold mb-2"
+									>所属单位</label
+								>
+								<select
+									id="unit"
+									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+									onchange="updateDepartments()"
+								>
+									<option value="">请选择单位</option>
+									<option value="单位1">单位1</option>
+									<option value="单位2">单位2</option>
+									<option value="单位3">单位3</option>
+								</select>
+							</div>
+							<div class="mb-4" id="department">
+								<label
+									for="department"
+									class="block text-gray-700 text-sm font-bold mb-2"
+									>所属部门（院系）</label
+								>
+								<select
+									id="department"
+									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+									disabled
+								>
+									<option value="">请先选择单位</option>
+								</select>
+							</div>
+
+							<!-- 邮箱输入框 -->
+							<div class="mb-4">
+								<label class="block text-gray-700 text-sm font-bold mb-2"
+									>联系方式（手机号/邮箱）</label
+								>
+								<input
+									type="text"
+									id="contact"
+									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+									placeholder="请输入手机号/邮箱"
+								/>
+							</div>
+							<!-- 备注 -->
+							<div class="mb-4">
+								<label class="block text-gray-700 text-sm font-bold mb-2"
+									>备注</label
+								>
+								<textarea
+									id="remark"
+									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+									placeholder="请输入备注信息"
+								></textarea>
+							</div>
+							<!-- 提交按钮 -->
+							<div class="flex items-center justify-end">
+								<button
+									class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+									type="submit"
+								>
+									保存信息
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			// 定义各单位对应的下级单位（院系）
+			const departmentMap = {
+				单位1: ["院系1-1", "院系1-2", "院系1-3"],
+				单位2: ["院系2-1", "院系2-2"],
+				单位3: ["院系3-1", "院系3-2", "院系3-3", "院系3-4"],
+			};
+
+			function updateDepartments() {
+				const unitSelect = document.getElementById("unit");
+				const departmentSelect = document.getElementById("department");
+				const selectedUnit = unitSelect.value;
+
+				// 清空原有的选项
+				departmentSelect.innerHTML = "";
+
+				if (selectedUnit) {
+					// 启用下拉框
+					departmentSelect.disabled = false;
+					// 添加提示选项
+					const defaultOption = document.createElement("option");
+					defaultOption.value = "";
+					defaultOption.textContent = "请选择院系";
+					departmentSelect.appendChild(defaultOption);
+
+					// 添加对应单位的院系选项
+					const departments = departmentMap[selectedUnit];
+					departments.forEach((department) => {
+						const option = document.createElement("option");
+						option.value = department;
+						option.textContent = department;
+						departmentSelect.appendChild(option);
+					});
+				} else {
+					// 禁用下拉框并添加提示选项
+					departmentSelect.disabled = true;
+					const defaultOption = document.createElement("option");
+					defaultOption.value = "";
+					defaultOption.textContent = "请先选择单位";
+					departmentSelect.appendChild(defaultOption);
+				}
+			}
+		</script>
+		<script>
+			const userMenuTrigger = document.getElementById("userMenuTrigger");
+			const userDropdown = document.getElementById("userDropdown");
+
+			const cookies = document.cookie.split("; ");
+			const idCookie = cookies.find((c) => c.startsWith("judge_id="));
+			const roleCookie = cookies.find((c) => c.startsWith("role="));
+			const judgeCookie = cookies.find((c) => c.startsWith("name="));
+
+			userMenuTrigger.addEventListener("click", () => {
+				userDropdown.classList.toggle("active");
+			});
+
+			document.addEventListener("click", (e) => {
+				if (
+					!userMenuTrigger.contains(e.target) &&
+					!userDropdown.contains(e.target)
+				) {
+					userDropdown.classList.remove("active");
+				}
+			});
+
+			function logout() {
+				document.cookie =
+					"judge_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+				document.cookie =
+					"role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+				document.cookie =
+					"name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+				window.location.href = "login.html";
+			}
+
+			function checkUserInfo() {
+				window.location.href = "/userinfo";
+			}
+
+			function checkLogin() {
+				if (!idCookie || !roleCookie) {
+					window.location.href = "login.html";
+				}
+				document.getElementById("judge-name").innerText =
+					judgeCookie.split("=")[1];
+			}
+			window.addEventListener("load", checkLogin);
+		</script>
+	</body>
+</html>

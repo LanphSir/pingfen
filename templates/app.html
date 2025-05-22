@@ -473,9 +473,7 @@
             // 获取当前登录用户的ID
             const cookies = document.cookie.split('; ');
             const idCookie = cookies.find(c => c.startsWith('judge_id='));
-            // const roleCookie = cookies.find(c => c.startsWith('role='));
             const current_judgeId = idCookie ? idCookie.split('=')[1] : null;
-            // const role = roleCookie ? roleCookie.split('=')[1] : null;
             submitScore(current_entryId, current_projectId, current_judgeId, totalScore); // 示例参数
             alert(`总分: ${totalScore}`);
         });

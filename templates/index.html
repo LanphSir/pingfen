@@ -76,12 +76,6 @@
 					>
 						<i class="fas fa-info-circle mr-2"></i> 关于
 					</button>
-					<button
-						class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-t-lg mr-2"
-						data-tab="tab3"
-					>
-						<i class="fas fa-cog mr-2"></i> 设置
-					</button>
 				</div>
 
 				<!-- 右侧登录下拉 -->
@@ -90,12 +84,7 @@
 						id="userMenuTrigger"
 						class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
 					>
-						<img
-							src="https://picsum.photos/32/32"
-							alt="用户头像"
-							class="w-8 h-8 rounded-full object-cover"
-						/>
-						<span class="hidden md:block">张三</span>
+						<span class="hidden md:block" id="judge-name"></span>
 						<i class="fas fa-chevron-down text-sm"></i>
 					</button>
 					<div class="dropdown-menu" id="userDropdown">
@@ -103,12 +92,14 @@
 							<a
 								href="#"
 								class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded hover:bg-gray-50 transition-colors"
+								onclick="checkUserInfo()"
 							>
 								<i class="fas fa-user mr-1"></i> 个人信息
 							</a>
 							<a
 								href="#"
 								class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded hover:bg-gray-50 transition-colors"
+								onclick="logout()"
 							>
 								<i class="fas fa-sign-out-alt mr-1"></i> 退出登录
 							</a>
@@ -122,11 +113,17 @@
 				<div id="tab1" class="tab-content active">
 					<h3 class="text-xl font-semibold text-gray-800 mb-4">欢迎来到首页</h3>
 
-					<div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="mt-6 grid grid-cols-1 md:grid-cols-1 gap-4">
 						<div class="p-4 bg-gray-50 rounded-lg">
-							<i class="fas fa-chart-line text-2xl text-indigo-500 mb-2"></i>
 							<p class="text-sm text-gray-600">
-								今日访问量：<span>1,234</span>
+								一、大赛名称
+								中国解剖学会首届AI应用能力大赛
+								二、大赛主题
+								“智启解剖·AI赋能教与学”
+								三、组织机构
+								主办单位：中国解剖学会
+								承办单位：中国解剖学会科技开发与咨询委员会
+
 							</p>
 						</div>
 					</div>
@@ -185,52 +182,28 @@
 				<!-- 关于和设置内容保持不变 -->
 				<div id="tab2" class="tab-content">
 					<h3 class="text-xl font-semibold text-gray-800 mb-4">关于我们</h3>
-					<p class="text-gray-600 leading-relaxed">
-						我们是一个专注于用户体验的设计团队，致力于打造美观与功能兼备的数字产品。Lorem
-						ipsum dolor sit amet consectetur adipisicing elit. Natus,
-						voluptates!
+					<p class="text-gray-600 leading-relaxed indent-4">
+						厦门科睿通教育科技有限公司自成立以来，专精于医学教学领域信息技术实训应用的研究，为各大院校提供量身开发的教学新媒体应用解决方案。提供多套软硬件结合的数字教学方案，并已经在多个教研实验室成功应用。			
 					</p>
+					<p class="text-gray-600 leading-relaxed indent-4">
+						我司坚定不移地立足于科技创新，潜心产品技术研发，注重产品品质和实用性，同时具备完善的售后服务体系，力求为客户提供最佳的服务质量和速度。
+					</p>
+					<p class="text-gray-600 leading-relaxed indent-4">
+						我司汇集了一批专业技术领域的优秀人才，组成了以青年科技精英骨干和医学教育专家共同协作的高素质科研团队，以严谨专业的态度和不断创新的经营理念在持续的产品研发实践中积累了丰富的产品设计经验和精深的理论知识。
+					</p>
+
 					<div class="mt-6">
-						<img
+						<!-- <img
 							src="https://picsum.photos/600/300"
 							alt="团队照片"
 							class="rounded-lg shadow-sm"
-						/>
+						/> -->
 					</div>
 				</div>
 
 				<div id="tab3" class="tab-content">
 					<h3 class="text-xl font-semibold text-gray-800 mb-4">系统设置</h3>
 					<div class="space-y-4">
-						<div class="flex items-center">
-							<label class="flex items-center">
-								<input
-									type="checkbox"
-									class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-									checked
-								/>
-								<span class="ml-2 text-sm text-gray-600">接收通知提醒</span>
-							</label>
-						</div>
-						<div class="flex items-center">
-							<label class="flex items-center">
-								<input
-									type="checkbox"
-									class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-								/>
-								<span class="ml-2 text-sm text-gray-600">自动保存草稿</span>
-							</label>
-						</div>
-						<div class="flex items-center">
-							<label class="flex items-center">
-								<input
-									type="checkbox"
-									class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-									checked
-								/>
-								<span class="ml-2 text-sm text-gray-600">启用夜间模式</span>
-							</label>
-						</div>
 					</div>
 				</div>
 			</div>
@@ -298,7 +271,7 @@
             const projectCardTitle = document.createElement("h5");
             projectCardTitle.className =
               "text-base font-medium text-gray-700 mb-3";
-            projectCardTitle.innerText = project.name;
+            projectCardTitle.innerText = project.name+"("+project.type+")";
 
             const projectCardContent = document.createElement("div");
             projectCardContent.className =
@@ -320,8 +293,8 @@
             `;
             projectCardContent.appendChild(projectCardLeft);
             // 查看已完成点评
-            projectCardLeft.addEventListener("click", () => {
-              
+            projectCardLeft.addEventListener("click", () => { 
+							window.location.href = `/list/${project.id}`;
             });
 
             const projectCardRight = document.createElement("div");
@@ -336,8 +309,12 @@
               </p>
             `;
             // 进入点评页面
-            projectCardRight.addEventListener("click", () => {
-              window.location.href = `/evaluation.html`;
+            projectCardRight.addEventListener("click", (e) => {
+							if(project.unreviewed_count<1){
+								e.preventDefault();
+								return false;
+							}
+              window.location.href = `/evaluation/${project.id}`;
             });
             projectCardContent.appendChild(projectCardRight);
             projectList.appendChild(projectCard);
@@ -346,7 +323,30 @@
 					console.error("解析失败:", error);
 				}
 			});
+			function checkLogin() {
+				const cookies = document.cookie.split("; ");
+				const idCookie = cookies.find((c) => c.startsWith("judge_id="));
+				const roleCookie = cookies.find((c) => c.startsWith("role="));
+				const judgeCookie = cookies.find((c) => c.startsWith("name="));
+
+				if (!idCookie || !roleCookie) {
+					window.location.href = "login.html";
+				}
+				document.getElementById("judge-name").innerText = judgeCookie.split("=")[1];
+			}
+
+			function logout() {
+				document.cookie = "judge_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+				document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+				document.cookie = "name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+				window.location.href = "login.html";
+			}
+			
+			function checkUserInfo() {
+				window.location.href = "/userinfo";
+			}
+
+			window.addEventListener("load", checkLogin);
 		</script>
-		<script src="../static/checklogin.js"></script>
 	</body>
 </html>
