@@ -8,7 +8,7 @@ DB_PATH = 'competition.db'
 CORS(app)
 
 @app.route('/')
-@app.route('/index.html')
+@app.route('/index')
 def index():
     return send_from_directory('templates', 'index.html')
 
@@ -21,7 +21,7 @@ def evaluation_page(project_id):
 def entries_list(project_id):
     return send_from_directory('templates', 'list.html') 
 
-@app.route('/login.html')
+@app.route('/login')
 def login_page():
     return send_from_directory('templates', 'login.html')
 

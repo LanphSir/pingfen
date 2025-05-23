@@ -19,14 +19,15 @@
 					}
 			});
 
-			// 返回
-			document.querySelector('.go-back-btn').addEventListener('click', function() {
+			// 返回主页
+			document.querySelector('.go-back-btn')?.addEventListener('click', function() {
 					window.location.href = '/'; 
 			})
 
+			// 登出
 			function logout() {
 				document.cookie = "judge_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 				document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 				document.cookie = "name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-				window.location.href = "login.html";
+				window.location.href = "/login";
 			}

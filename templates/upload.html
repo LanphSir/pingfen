@@ -114,9 +114,9 @@
         <div class="flex items-center justify-between bg-gray-50 border-b border-gray-200 py-2 px-4">
             <!-- 左侧返回 -->
             <div class="flex items-center gap-2">
-                <a href="#" class="text-gray-600 hover:text-gray-800 transition-colors">
+                <!-- <a href="#" class="text-gray-600 hover:text-gray-800 transition-colors">
                     <i class="fas fa-chevron-left text-lg"></i>
-                </a>
+                </a> -->
                 <h3 class="text-sm font-medium text-gray-800">作品上传</h3>
             </div>
 
@@ -408,8 +408,8 @@
 
                     // 可在此处添加上传成功后的处理逻辑，如提示用户、重置表单等
                     alert(data);
-                    // form.reset();
-                    // document.getElementById('filePreview').textContent = '';
+                    form.reset();
+                    document.getElementById('filePreview').textContent = '';
                 } catch (error) {
                     console.error('表单提交失败:', error);
                     // 可在此处添加上传失败后的处理逻辑，如提示用户

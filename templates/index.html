@@ -209,38 +209,7 @@
 			</div>
 		</div>
 
-		<script>
-			// 标签切换逻辑
-			document.querySelectorAll(".tab-btn").forEach((button) => {
-				button.addEventListener("click", () => {
-					const tabId = button.dataset.tab;
-					document
-						.querySelectorAll(".tab-btn")
-						.forEach((btn) => btn.classList.remove("active"));
-					button.classList.add("active");
-					document
-						.querySelectorAll(".tab-content")
-						.forEach((content) => content.classList.remove("active"));
-					document.getElementById(tabId).classList.add("active");
-				});
-			});
-
-			// 登录下拉菜单逻辑
-			const userMenuTrigger = document.getElementById("userMenuTrigger");
-			const userDropdown = document.getElementById("userDropdown");
-
-			userMenuTrigger.addEventListener("click", () => {
-				userDropdown.classList.toggle("active");
-			});
-
-			document.addEventListener("click", (e) => {
-				if (
-					!userMenuTrigger.contains(e.target) &&
-					!userDropdown.contains(e.target)
-				) {
-					userDropdown.classList.remove("active");
-				}
-			});
+		<script src="/static/js/checklogin.js">
 		</script>
 		<script>
 			document.addEventListener("DOMContentLoaded", async function () {
@@ -330,16 +299,9 @@
 				const judgeCookie = cookies.find((c) => c.startsWith("name="));
 
 				if (!idCookie || !roleCookie) {
-					window.location.href = "login.html";
+					window.location.href = "/login";
 				}
 				document.getElementById("judge-name").innerText = judgeCookie.split("=")[1];
-			}
-
-			function logout() {
-				document.cookie = "judge_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-				document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-				document.cookie = "name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-				window.location.href = "login.html";
 			}
 			
 			function checkUserInfo() {

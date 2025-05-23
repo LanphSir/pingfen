@@ -505,7 +505,6 @@
 
         /**
          *    提交评分
-         * 作品id, 项目id, 评分维度id（需移除）, 判定人id, 评分
          */
         async function submitScore(entryId, projectId, judgeId, score) {
             try {
@@ -536,7 +535,7 @@
         });
         function checkLogin() {    
             if (!idCookie || !roleCookie) {
-                window.location.href = 'login.html';
+                window.location.href = '/login';
             }
             document.getElementById("judge-name").innerText = judgeCookie.split("=")[1];
         }    
@@ -544,7 +543,7 @@
 
         function goBack() {
             checkSubmitting();
-            window.location.href = '/index.html';
+            window.location.href = '/';
         }
 
     </script>
