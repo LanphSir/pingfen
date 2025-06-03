@@ -3,10 +3,10 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>标签切换页面</title>
+		<title>用户信息</title>
 		<script src="https://cdn.tailwindcss.com"></script>
 		<link
-			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+			href="/pingfen/static/font/fontawesome-free-6.7.2-web/css/all.min.css"
 			rel="stylesheet"
 		/>
 		<style>
@@ -86,7 +86,7 @@
 					<button
 						class="px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-t-lg mr-2"
 						data-tab="tab1"
-						onclick="window.location.href='/'"
+						onclick="window.location.href='/pingfen'"
 					>
 						<i class="fas fa-home mr-2"></i> 首页
 					</button>
@@ -134,6 +134,49 @@
 					<div class="bg-white p-6 rounded-lg shadow-md">
 						<h2 class="text-xl font-semibold mb-4">个人信息</h2>
 						<form>
+							<div class="mb-4">
+								<label
+									for="account"
+									class="block text-gray-700 text-sm font-bold mb-2"
+									>账号</label
+								>
+								<input
+									type="text"
+									id="account"
+									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline disabled:bg-gray-100"
+									disabled
+								/>
+							</div>
+							<!-- 所属单位选择-->
+							<div class="mb-4" id="organization">
+								<label
+									for="unit"
+									class="block text-gray-700 text-sm font-bold mb-2"
+									>所属单位</label
+								>
+								<input
+									type="text"
+									id="unit"
+									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline disabled:bg-gray-100"
+									disabled
+								>
+								</input>
+							</div>
+							<div class="mb-4" id="department-box">
+								<label
+									for="department"
+									class="block text-gray-700 text-sm font-bold mb-2"
+									>所属部门（院系）</label
+								>
+								<input
+								type="text"
+									id="department"
+									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline disabled:bg-gray-100"
+									disabled
+								>
+								</input>
+							</div>
+							
 							<!-- 姓名输入框 -->
 							<div class="mb-4">
 								<label
@@ -147,38 +190,6 @@
 									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
 									placeholder="请输入姓名"
 								/>
-							</div>
-							<!-- 所属单位选择-->
-							<div class="mb-4" id="organization">
-								<label
-									for="unit"
-									class="block text-gray-700 text-sm font-bold mb-2"
-									>所属单位</label
-								>
-								<select
-									id="unit"
-									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-									onchange="updateDepartments()"
-								>
-									<option value="">请选择单位</option>
-									<option value="单位1">单位1</option>
-									<option value="单位2">单位2</option>
-									<option value="单位3">单位3</option>
-								</select>
-							</div>
-							<div class="mb-4" id="department">
-								<label
-									for="department"
-									class="block text-gray-700 text-sm font-bold mb-2"
-									>所属部门（院系）</label
-								>
-								<select
-									id="department"
-									class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-									disabled
-								>
-									<option value="">请先选择单位</option>
-								</select>
 							</div>
 
 							<!-- 邮箱输入框 -->
@@ -207,6 +218,7 @@
 							<!-- 提交按钮 -->
 							<div class="flex items-center justify-end">
 								<button
+									onclick="saveInfo(event)"
 									class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
 									type="submit"
 								>
@@ -218,49 +230,7 @@
 				</div>
 			</div>
 		</div>
-		<script>
-			// 定义各单位对应的下级单位（院系）
-			const departmentMap = {
-				单位1: ["院系1-1", "院系1-2", "院系1-3"],
-				单位2: ["院系2-1", "院系2-2"],
-				单位3: ["院系3-1", "院系3-2", "院系3-3", "院系3-4"],
-			};
 
-			function updateDepartments() {
-				const unitSelect = document.getElementById("unit");
-				const departmentSelect = document.getElementById("department");
-				const selectedUnit = unitSelect.value;
-
-				// 清空原有的选项
-				departmentSelect.innerHTML = "";
-
-				if (selectedUnit) {
-					// 启用下拉框
-					departmentSelect.disabled = false;
-					// 添加提示选项
-					const defaultOption = document.createElement("option");
-					defaultOption.value = "";
-					defaultOption.textContent = "请选择院系";
-					departmentSelect.appendChild(defaultOption);
-
-					// 添加对应单位的院系选项
-					const departments = departmentMap[selectedUnit];
-					departments.forEach((department) => {
-						const option = document.createElement("option");
-						option.value = department;
-						option.textContent = department;
-						departmentSelect.appendChild(option);
-					});
-				} else {
-					// 禁用下拉框并添加提示选项
-					departmentSelect.disabled = true;
-					const defaultOption = document.createElement("option");
-					defaultOption.value = "";
-					defaultOption.textContent = "请先选择单位";
-					departmentSelect.appendChild(defaultOption);
-				}
-			}
-		</script>
 		<script>
 			const userMenuTrigger = document.getElementById("userMenuTrigger");
 			const userDropdown = document.getElementById("userDropdown");
@@ -282,6 +252,64 @@
 					userDropdown.classList.remove("active");
 				}
 			});
+			
+			async function init() {
+				try {
+					const response = await fetch("/pingfen/get_judge_info", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							judge_id: idCookie.split("=")[1]
+						}),
+					});
+					const data = await response.json();
+					console.log(data);
+
+					if (data) {
+						document.getElementById("account").value = data.account;
+						document.getElementById("name").value = data.name;
+						document.getElementById("unit").value = data.organization_name;
+						document.getElementById("department").value = data.organization_department;
+						document.getElementById("contact").value = data.contact;
+						document.getElementById("remark").value = data.remark;
+					}
+				}
+				catch (error) {
+					console.error(error);
+				}
+			}
+
+			document.addEventListener("DOMContentLoaded", () => {
+				init();
+			});
+
+			async function saveInfo(e) {
+				e.preventDefault();
+				const name = document.getElementById("name").value;
+				const contact = document.getElementById("contact").value;
+				const remark = document.getElementById("remark").value;
+
+				if (!name || !contact) {
+					alert("姓名和联系方式不能为空");
+					return;
+				}
+				const response = await fetch("/pingfen/update_judge", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						judge_id: idCookie.split("=")[1],
+						name: name,
+						contact: contact,
+						remark: remark,
+					}),
+				})
+				const data = await response.json();
+				alert(data.message);
+			}
 
 			function logout() {
 				document.cookie =
@@ -290,16 +318,16 @@
 					"role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 				document.cookie =
 					"name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-				window.location.href = "/login";
+				window.location.href = "/pingfen/login";
 			}
 
 			function checkUserInfo() {
-				window.location.href = "/userinfo";
+				window.location.href = "/pingfen/userinfo";
 			}
 
 			function checkLogin() {
 				if (!idCookie || !roleCookie) {
-					window.location.href = "/login";
+					window.location.href = "/pingfen/login";
 				}
 				document.getElementById("judge-name").innerText =
 					judgeCookie.split("=")[1];

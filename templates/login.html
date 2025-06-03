@@ -64,7 +64,7 @@
             const account = document.getElementById('account').value;
             const role = document.getElementById('role').selectedOptions[0].text;
             // 发送登录请求
-            fetch('/login', {
+            fetch('/pingfen/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -74,20 +74,32 @@
                     role: role
                 })
             })
-           .then(response => response.json())
-           .then(data => {
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
                     // 设置cookie，保留12小时
                     const expiration = new Date(Date.now() + 12 * 60 * 60 * 1000);
                     document.cookie = `judge_id=${data.id}; expires=${expiration.toUTCString()}; path=/`;
                     document.cookie = `name=${data.name}; expires=${expiration.toUTCString()}; path=/`;
                     document.cookie = `role=${data.role}; expires=${expiration.toUTCString()}; path=/`;
-                    window.location.href = '/';
+                    window.location.href = '/pingfen/index';
                 } else {
                     alert('登录失败，请检查账号和身份！');
                 }
             });
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const cookies = document.cookie.split('; ');
+            const cookieMap = {};
+            cookies.forEach(cookie => {
+                const [key, value] = cookie.split('=');
+                cookieMap[key.trim()] = value;
+            });
+            if (cookieMap.judge_id) {
+                window.location.href = '/pingfen/index';
+            }
+        })
     </script>
 </body>
 </html>

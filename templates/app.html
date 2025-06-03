@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>引导入口</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/pingfen/static/font/fontawesome-free-6.7.2-web/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #f8fafc; /* 延续浅灰色背景 */
+        }
+
+        /* 主容器：整体居中 */
+        .entry-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* 入口网格：根据数量自动排列 */
+        .entry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 最小列宽180px */
+            gap: 2.5rem; /* 项间距 */
+            max-width: 800px; /* 限制最大宽度，控制4个时两行 */
+            width: 100%;
+        }
+
+        /* 入口卡片样式 */
+        .entry-card {
+            width: 180px;
+            height: 180px;
+            justify-self: center; /* 单个列时居中 */
+            border: 2px solid #2563eb; /* 靛蓝边框 */
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            text-decoration: none; /* 链接无下划线 */
+        }
+
+        .entry-card:hover {
+            transform: translateY(-8px); /* 向上偏移 */
+            box-shadow: 0 6px 12px -2px rgba(0,0,0,0.1), 0 3px 7px -1px rgba(0,0,0,0.06);
+        }
+
+        /* 卡片图标 */
+        .entry-icon {
+            font-size: 2.5rem;
+            color: #2563eb; /* 靛蓝图标 */
+        }
+
+        /* 卡片文字 */
+        .entry-text {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #1e40af; /* 深靛蓝文字 */
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="entry-container">
+        <!-- 入口网格，可通过修改子元素数量测试不同布局 -->
+        <div class="entry-grid">
+            <!-- 入口1 -->
+            <a href="/pingfen/upload" class="entry-card">
+                <i class="fas fa-upload entry-icon"></i>
+                <span class="entry-text">作品上传</span>
+            </a>
+
+            <!-- 入口2 -->
+            <!-- <a href="profile-edit.html" class="entry-card">
+                <i class="fas fa-user-edit entry-icon"></i>
+                <span class="entry-text">个人信息</span>
+            </a> -->
+
+            <a href="/pingfen/main" class="entry-card">
+                <i class="fas fa-table entry-icon"></i>
+                <span class="entry-text">榜单查看</span>
+            </a>
+
+            <a href="/pingfen/index" class="entry-card">
+                <i class="fas fa-user entry-icon"></i>
+                <span class="entry-text">评委入口</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+    

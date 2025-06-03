@@ -21,7 +21,7 @@
 
 			// 返回主页
 			document.querySelector('.go-back-btn')?.addEventListener('click', function() {
-					window.location.href = '/'; 
+					window.location.href = '/pingfen/index'; 
 			})
 
 			// 登出
@@ -29,5 +29,5 @@
 				document.cookie = "judge_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 				document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 				document.cookie = "name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-				window.location.href = "/login";
+				window.location.href = "/pingfen/login";
 			}

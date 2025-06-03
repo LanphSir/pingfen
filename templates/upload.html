@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>作品上传</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <link href="/pingfen/static/font/fontawesome-free-6.7.2-web/css/all.min.css" rel="stylesheet">
     <style>
         .page-content {
             animation: fadeIn 0.3s ease-in-out;
@@ -114,10 +114,9 @@
         <div class="flex items-center justify-between bg-gray-50 border-b border-gray-200 py-2 px-4">
             <!-- 左侧返回 -->
             <div class="flex items-center gap-2">
-                <!-- <a href="#" class="text-gray-600 hover:text-gray-800 transition-colors">
-                    <i class="fas fa-chevron-left text-lg"></i>
-                </a> -->
-                <h3 class="text-sm font-medium text-gray-800">作品上传</h3>
+                <a href="/pingfen/home" class="text-gray-600 hover:text-gray-800 transition-colors">
+                    <i class="fas fa-chevron-left text-lg"></i>                
+                <button class="text-sm font-medium text-gray-800">返回</button></a>
             </div>
 
         </div>
@@ -125,7 +124,7 @@
         <!-- 内容区域 -->
         <div class="page-content p-6">
             <div class="form-card">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">作品上传表单</h3>
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">作品上传</h3>
                 <form id="uploadForm" class="space-y-4" method="POST">
                     <!-- 所属单位选择-->
                     <div class="mb-4" id="organization">
@@ -141,13 +140,10 @@
                             onchange="updateDepartments()"
                         >
                             <option value="">请选择单位</option>
-                            <option value="单位1">单位1</option>
-                            <option value="单位2">单位2</option>
-                            <option value="单位3">单位3</option>
                         </select>
                         <div class="error-message">学校名称不能为空</div>
                     </div>
-                    <div class="mb-4" id="department">
+                    <div class="mb-4" id="department-box">
                         <label
                             for="department"
                             class="block text-gray-700 text-sm font-bold mb-2"
@@ -273,7 +269,7 @@
 
         function updateDepartments() {
             const unitSelect = document.getElementById("school");
-            const departmentSelect = document.querySelector("#department select");
+            const departmentSelect = document.getElementById("department");
             const selectedUnit = unitSelect.value;
 
             // 清空原有的选项
@@ -293,7 +289,11 @@
                 departments.forEach((department) => {
                     const option = document.createElement("option");
                     option.value = department.id;
-                    option.textContent = department.department;
+                    if(department.department != null && department.department.trim() != ''){
+                        option.textContent = department.department;
+                    }else{
+                        option.textContent = `${selectedUnit}(如果所在单位没有院系或列表中没有，请选择这项)`;
+                    }
                     departmentSelect.appendChild(option);
                 });
             } else {
@@ -317,7 +317,7 @@
 
         async function initForm() {
             try {
-                const response = await fetch('/get_upload_form/1');
+                const response = await fetch('/pingfen/get_upload_form/1');
                 const data = await response.json();
                 console.log(data);
                 
@@ -345,7 +345,7 @@
                     groupedDepartments[department.name].push({department:department.department, id: department.id});
                 });
                 departmentMap = groupedDepartments;
-                console.log(departmentMap);
+                
                 const schoolSelect = form.querySelector('#school');
                 schoolSelect.innerHTML = '';
                 const defaultSchoolOption = document.createElement('option');
@@ -353,6 +353,7 @@
                 defaultSchoolOption.textContent = '请选择学校';
                 schoolSelect.appendChild(defaultSchoolOption);
                 const schools = Object.keys(groupedDepartments);
+                schools.sort();
                 schools.forEach(school => {
                     const option = document.createElement('option');
                     option.value = school;
@@ -367,8 +368,16 @@
         }
 
         document.addEventListener('DOMContentLoaded', initForm);
+        // 定义一个变量来跟踪提交状态
+        let isSubmitting = false;
 
         async function submitForm(e) {
+            // 检查是否正在提交，如果是则弹出提示并阻止提交
+            if (isSubmitting) {
+                alert('当前提交未完成请等待');
+                return;
+            }
+
             // 阻止表单默认提交行为
             e.preventDefault();
 
@@ -387,12 +396,18 @@
             });
 
             if (isValid) {
+                if(confirm('确认无误，是否提交？') == false){
+                    return;
+                }
                 try {
+                    // 标记为正在提交
+                    isSubmitting = true;
+
                     // 获取表单数据
                     const formData = new FormData(form);
 
                     // 发送表单数据
-                    const response = await fetch('/upload_entry', {
+                    const response = await fetch('/pingfen/upload_entry', {
                         method: 'POST',
                         body: formData
                     });
@@ -404,20 +419,44 @@
 
                     // 解析响应数据
                     const data = await response.json();
-                    console.log(data);
-
-                    // 可在此处添加上传成功后的处理逻辑，如提示用户、重置表单等
-                    alert(data);
-                    form.reset();
-                    document.getElementById('filePreview').textContent = '';
+                    alert(data.message);
+                    // form.reset();
+                    // document.getElementById('filePreview').textContent = '';
                 } catch (error) {
                     console.error('表单提交失败:', error);
+                    // 关闭提交等待提示（由于浏览器限制，无法直接关闭alert，这里只是示意逻辑）
+                    // 可使用自定义模态框替代alert实现关闭功能
+
                     // 可在此处添加上传失败后的处理逻辑，如提示用户
                     alert('上传失败，请稍后重试。');
+                } finally {
+                    // 无论成功或失败，都标记为提交完成
+                    isSubmitting = false;
                 }
             }
         }
-        document.querySelector('.submit-btn').addEventListener('click', submitForm);
+        
+        // 定义防抖函数
+        function debounce(func, delay) {
+            let timer = null;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    func.apply(context, args);
+                }, delay);
+            };
+        }
+
+        // 使用防抖函数绑定点击事件
+        document.querySelector('.submit-btn').addEventListener('click', debounce(submitForm, 1000));
+
+        // 重置表单
+        document.querySelector('.cancel-btn').addEventListener('click', () => {
+            document.getElementById('uploadForm').reset();
+            document.getElementById('filePreview').textContent = '';
+        });
 
     </script>
 </body>

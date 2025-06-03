@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>表格页面</title>
+    <title>已完成评分表格</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <link href="/pingfen/static/font/fontawesome-free-6.7.2-web/css/all.min.css" rel="stylesheet">
     <style>
         .tab-content {
             display: none;
@@ -178,7 +178,7 @@
         <div class="p-6">
             <!-- 用户列表（默认激活） -->
             <div id="user-table" class="tab-content active">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">用户数据表格</h3>
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">评分数据表格</h3>
                 <div class="overflow-x-auto">
                     <table class="data-table" id="userData">
                         <thead>
@@ -212,13 +212,8 @@
             </div>
         </div>
     </div>
-    <script src="/static/js/checklogin.js"></script>
+    <script src="/pingfen/static/js/checklogin.js"></script>
     <script>
-
-        //返回
-        document.querySelector('.go-back-btn').addEventListener('click', function() {
-            window.location.href = '/'; 
-        })
 
         var currentPage = 1;
         var itemsPerPage = 15;
@@ -227,17 +222,18 @@
         const idCookie = cookies.find(c => c.startsWith('judge_id='));
         const roleCookie = cookies.find(c => c.startsWith('role='));
         const judgeCookie = cookies.find((c) => c.startsWith("name="));
-        var judge_id = idCookie ? idCookie.split('=')[1] : null,project_id=window.location.pathname.split('/')[2];
+        const pathParts = window.location.pathname.split('/');
+        var judge_id = idCookie ? idCookie.split('=')[1] : null,project_id=pathParts[pathParts.length - 1];
         function checkLogin() {    
             if (!idCookie || !roleCookie) {
-                window.location.href = '/login';
+                window.location.href = '/pingfen/login';
             }
             document.getElementById("judge-name").innerText = judgeCookie.split("=")[1];
         }    
         window.addEventListener('load', checkLogin);
 
         async function paginate(tableId) {
-            const entrys=await fetch('/get_reviewed_entries', {
+            const entrys=await fetch('/pingfen/get_reviewed_entries', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -251,8 +247,8 @@
             })
             const data = await entrys.json();
             const tableBody = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-            tableBody.innerHTML = ''; // 清空表格内容
-            data.forEach(entry => {
+            tableBody.innerHTML = ''; // 清空表格内容            
+            data.data.forEach(entry => {
                 const row = tableBody.insertRow();
                 row.insertCell(0).textContent = entry.id;
                 row.insertCell(1).textContent = entry.project_name+'('+entry.project_type+')';
@@ -265,11 +261,11 @@
                 const viewBtn = row.cells[5].querySelector('.action-btn.view');
                 viewBtn.addEventListener('click', () => {
                     // 跳转到详情页，传递entry.id作为参数
-                    window.location.href = `/update/${entry.id}`;
+                    window.location.href = `/pingfen/update/${entry.id}`;
                 });
             })
 
-            totalCount = data[0].total_count;
+            totalCount = data.total_count;
             updatePagination('user');
         }
         paginate('userData');
